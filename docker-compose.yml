@@ -27,9 +27,12 @@ services:
       args:
         PHP_VERSION: $PHP_VERSION
         PHPREDIS_VERSION: $PHPREDIS_VERSION
+        APP_ENV: $APP_ENV
       context: .
       dockerfile: ./docker/php-fpm/Dockerfile
-      target: dev
+      target: ${APP_ENV}
+    environment:
+      - COMPOSER_MEMORY_LIMIT=-1
     restart: on-failure
     command: sh -c 'composer install --no-interaction --optimize-autoloader && php-fpm'
     networks:

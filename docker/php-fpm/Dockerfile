@@ -13,27 +13,31 @@ RUN wget https://getcomposer.org/installer && \
     php installer --install-dir=/usr/local/bin/ --filename=composer && \
     rm installer
 
-# Install temporary packages
-RUN apk add --no-cache --virtual .build-deps freetype-dev libpng-dev libjpeg-turbo-dev \
- zlib-dev libzip-dev libxml2-dev libsodium-dev gmp-dev libmcrypt-dev git autoconf gcc g++ make
+# Install run dependencies
+RUN apk add --no-cache --virtual .run-deps bash tzdata libmemcached-libs libpq libzip zlib libpng freetype libjpeg-turbo \
+    libxpm libwebp libbz2 libexif gmp xmlrpc-c c-client icu-libs gnu-libiconv libmcrypt git autoconf gcc g++ make \
 
-# Install system dependencies
-RUN apk add --no-cache freetype libpng libjpeg-turbo libzip postgresql-dev libsodium gmp libmcrypt curl
+    # Install build packages
+    && apk add --no-cache --virtual .build-deps openssl-dev libmemcached-dev cyrus-sasl-dev postgresql-dev \
+    libzip-dev zlib-dev libpng-dev freetype-dev libjpeg-turbo-dev libxpm-dev libwebp-dev libexif-dev gmp-dev \
+    xmlrpc-c-dev bzip2-dev imap-dev gettext-dev libwebp-dev icu-dev libsodium-dev \
 
-# Configure gd
-RUN docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/
-
-RUN echo ${PHPREDIS_VERSION}
-
-# Install redis
-RUN curl -L -o /tmp/phpredis.tar.gz https://github.com/phpredis/phpredis/archive/${PHPREDIS_VERSION}.tar.gz \
+    # Install redis
+    && mkdir -p /usr/src/php/ext/ \
+    && curl -L -o /tmp/phpredis.tar.gz https://github.com/phpredis/phpredis/archive/${PHPREDIS_VERSION}.tar.gz \
     && tar xfz /tmp/phpredis.tar.gz \
     && rm -r /tmp/phpredis.tar.gz \
-    && mv phpredis-${PHPREDIS_VERSION} /usr/src/php/ext/redis
+    && ls -al \
+    && mv phpredis-${PHPREDIS_VERSION} /usr/src/php/ext/redis \
 
-# Install php extensions
-RUN NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) \
-    && docker-php-ext-install -j${NPROC} gd pdo_pgsql pgsql zip soap intl bcmath sodium gmp redis pcntl \
+    # Configure and install gd
+    && NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) \
+    && docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ \
+    && docker-php-ext-install -j${NPROC} gd \
+    && php -r 'var_dump(gd_info());' \
+
+    # Install php extensions
+    && docker-php-ext-install -j${NPROC} pdo_pgsql pgsql zip soap intl bcmath sodium gmp redis pcntl \
     && docker-php-ext-enable redis pcntl
 
 WORKDIR /laravel
@@ -51,8 +55,9 @@ COPY composer.json .
 
 # ======== Dev image ========
 FROM php-base AS dev
+ARG APP_ENV="dev"
+ENV APP_ENV=${APP_ENV}
 
-ENV APP_ENV=dev
 WORKDIR /laravel
 
 ## Copy project files to workdir
@@ -76,15 +81,17 @@ COPY ./docker/php-fpm/default.ini /usr/local/etc/php/conf.d/
 COPY ./docker/php-fpm/pool.conf /usr/local/etc/php-fpm.d/www.conf
 
 ## Change files owner to php-fpm default user
-RUN chown -R www-data:www-data .
-RUN chmod -R 777 /laravel/storage
+RUN chown -R www-data:www-data . \
+    && chmod -R 777 /laravel/storage
 
 ## Cleanup
-RUN apk del .build-deps
+RUN apk del .build-deps && apk del .run-deps && rm -rf /var/cache/apk/*
 
 # ======== Test image ========
-FROM php-base AS testing
-ENV APP_ENV=testing
+FROM php-base AS test
+ARG APP_ENV="test"
+ENV APP_ENV=${APP_ENV}
+
 WORKDIR /laravel
 
 ## Copy project files to workdir
@@ -95,34 +102,35 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 RUN composer install --no-interaction --optimize-autoloader
 
 ## Change files owner to php-fpm default user
-RUN chown -R www-data:www-data .
-RUN chmod -R 777 /laravel/storage
+RUN chown -R www-data:www-data . \
+    && chmod -R 777 /laravel/storage
 
 RUN php -m && php artisan list
 
 ## Cleanup
-RUN apk del .build-deps
+RUN apk del .build-deps && apk del .run-deps && rm -rf /var/cache/apk/*
+
 # ======== Prod image ========
 FROM php-base AS prod
+ARG APP_ENV="prod"
 ARG COMMIT
 ARG VERSION
 ARG VAULT_ADDR
-
-ENV APP_ENV=prod
+ENV APP_ENV=${APP_ENV}
 ENV VAULT_ADDR=${VAULT_ADDR}
 
 WORKDIR /laravel
 
 RUN composer install \
-      --ignore-platform-reqs \
-      --optimize-autoloader \
-      --no-interaction \
-      --no-plugins \
-      --no-scripts \
-      --prefer-dist \
-      --verbose \
-      --no-dev \
-    && composer show --tree|grep "ext-"|| true
+    --ignore-platform-reqs \
+    --optimize-autoloader \
+    --no-interaction \
+    --no-plugins \
+    --no-scripts \
+    --prefer-dist \
+    --verbose \
+    --no-dev \
+    && composer show --tree|grep "ext-" || true
 
 COPY --from=consul-template /consul-template /usr/local/bin/
 
@@ -162,4 +170,4 @@ CMD if [ -n "${VAULT_ADDR}" ]; then \
     fi
 
 ## Cleanup
-RUN apk del .build-deps
+RUN apk del .build-deps && apk del .run-deps && rm -rf /var/cache/apk/*
