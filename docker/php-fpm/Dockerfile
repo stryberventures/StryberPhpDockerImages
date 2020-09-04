@@ -15,7 +15,8 @@ RUN apk update \
     && apk add --no-cache freetype libpng libjpeg-turbo libzip libsodium gmp libmcrypt \
     # Install build packages
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS freetype-dev libpng-dev libjpeg-turbo-dev zlib-dev libzip-dev \
-       libxml2-dev libsodium-dev gmp-dev libmcrypt-dev postgresql-dev \
+       libxml2-dev libsodium-dev gmp-dev libmcrypt-dev \
+    && apk add postgresql-dev \
     # Install redis
     && mkdir -p /usr/src/php/ext/ \
     && curl -L -o /tmp/phpredis.tar.gz https://github.com/phpredis/phpredis/archive/${PHPREDIS_VERSION}.tar.gz \
