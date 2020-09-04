@@ -97,6 +97,9 @@ WORKDIR /laravel
 ## Copy project files to workdir
 COPY . .
 
+## Install composer plugin that downloads packages in parallel to speed up the installation process.
+RUN composer global require hirak/prestissimo
+
 ## Install application dependencies
 ENV COMPOSER_ALLOW_SUPERUSER=1
 RUN composer install --no-interaction --optimize-autoloader
