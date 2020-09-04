@@ -52,3 +52,15 @@ MailDev is a simple way to test your project's generated emails during developme
 
 ### Supervisor
 ...
+
+# Pushing new images to GitHub registry
+~/github_token.txt - file with [personal access token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)
+
+
+```
+cat ~/github_token.txt | docker login https://docker.pkg.github.com -u USER --password-stdin
+docker build --target php-base -t stryber-php:0.0.1 -f docker/php-fpm/Dockerfile .
+docker tag b7bbe48b5a01 docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php:0.0.1
+docker build --target php-base -t docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php:0.0.1 YOUR_PATH/docker/php-fpm
+docker push docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php:0.0.1
+```

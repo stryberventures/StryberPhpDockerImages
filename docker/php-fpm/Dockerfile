@@ -1,8 +1,5 @@
-ARG PHP_VERSION=7.4.8-fpm-alpine3.12
+ARG PHP_VERSION=7.4-fpm-alpine3.12
 ARG CONSUL_TEMPLATE_VERSION=0.25.0-scratch
-
-# ======== Consul Template ========
-FROM hashicorp/consul-template:${CONSUL_TEMPLATE_VERSION} as consul-template
 
 # ======== PHP BASE IMAGE ========
 FROM php:${PHP_VERSION} as php-base
@@ -13,15 +10,12 @@ RUN wget https://getcomposer.org/installer && \
     php installer --install-dir=/usr/local/bin/ --filename=composer && \
     rm installer
 
-# Install run dependencies
-RUN apk add --no-cache --virtual .run-deps bash tzdata libmemcached-libs libpq libzip zlib libpng freetype libjpeg-turbo \
-    libxpm libwebp libbz2 libexif gmp xmlrpc-c c-client icu-libs gnu-libiconv libmcrypt git autoconf gcc g++ make \
-
+RUN apk update \
+    # Install run dependencies
+    && apk add --no-cache freetype libpng libjpeg-turbo libzip libsodium gmp libmcrypt \
     # Install build packages
-    && apk add --no-cache --virtual .build-deps openssl-dev libmemcached-dev cyrus-sasl-dev postgresql-dev \
-    libzip-dev zlib-dev libpng-dev freetype-dev libjpeg-turbo-dev libxpm-dev libwebp-dev libexif-dev gmp-dev \
-    xmlrpc-c-dev bzip2-dev imap-dev gettext-dev libwebp-dev icu-dev libsodium-dev \
-
+    && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS freetype-dev libpng-dev libjpeg-turbo-dev zlib-dev libzip-dev \
+       libxml2-dev libsodium-dev gmp-dev libmcrypt-dev postgresql-dev \
     # Install redis
     && mkdir -p /usr/src/php/ext/ \
     && curl -L -o /tmp/phpredis.tar.gz https://github.com/phpredis/phpredis/archive/${PHPREDIS_VERSION}.tar.gz \
@@ -29,34 +23,35 @@ RUN apk add --no-cache --virtual .run-deps bash tzdata libmemcached-libs libpq l
     && rm -r /tmp/phpredis.tar.gz \
     && ls -al \
     && mv phpredis-${PHPREDIS_VERSION} /usr/src/php/ext/redis \
-
     # Configure and install gd
     && NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) \
     && docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ \
     && docker-php-ext-install -j${NPROC} gd \
     && php -r 'var_dump(gd_info());' \
-
+    # Install Postgre PDO
+    && docker-php-ext-install -j${NPROC} pdo pdo_pgsql pgsql \
     # Install php extensions
-    && docker-php-ext-install -j${NPROC} pdo_pgsql pgsql zip soap intl bcmath sodium gmp redis pcntl \
+    && docker-php-ext-install -j${NPROC} zip soap intl bcmath sodium gmp redis pcntl \
     && docker-php-ext-enable redis pcntl
 
-WORKDIR /laravel
-
-COPY app/ app/
-COPY bootstrap/ bootstrap/
-COPY config/ config/
-COPY database/ database/
-COPY public/ public/
-COPY resources/ resources/
-COPY routes/ routes/
-COPY storage/ storage/
-COPY artisan .
-COPY composer.json .
+## Cleanup
+RUN apk del .build-deps && rm -rf /var/cache/apk/*
 
 # ======== Dev image ========
 FROM php-base AS dev
+RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
+
 ARG APP_ENV="dev"
 ENV APP_ENV=${APP_ENV}
+
+# Install run dependencies
+RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
+    # build tools
+    autoconf g++ gcc make \
+    # lib tools
+    bzip2-dev freetype-dev gettext-dev icu-dev imagemagick-dev libintl libjpeg-turbo-dev \
+    #  libmcrypt-dev
+    libpng-dev libxslt-dev libzip-dev
 
 WORKDIR /laravel
 
@@ -85,10 +80,10 @@ RUN chown -R www-data:www-data . \
     && chmod -R 777 /laravel/storage
 
 ## Cleanup
-RUN apk del .build-deps && apk del .run-deps && rm -rf /var/cache/apk/*
-
+RUN apk del .build-deps && rm -rf /var/cache/apk/*
 # ======== Test image ========
 FROM php-base AS test
+RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
 ARG APP_ENV="test"
 ENV APP_ENV=${APP_ENV}
 
@@ -110,8 +105,8 @@ RUN chown -R www-data:www-data . \
 
 RUN php -m && php artisan list
 
-## Cleanup
-RUN apk del .build-deps && apk del .run-deps && rm -rf /var/cache/apk/*
+# ======== Consul Template ========
+FROM hashicorp/consul-template:${CONSUL_TEMPLATE_VERSION} as consul-template
 
 # ======== Prod image ========
 FROM php-base AS prod
@@ -122,7 +117,20 @@ ARG VAULT_ADDR
 ENV APP_ENV=${APP_ENV}
 ENV VAULT_ADDR=${VAULT_ADDR}
 
+RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
+
 WORKDIR /laravel
+
+COPY app/ app/
+COPY bootstrap/ bootstrap/
+COPY config/ config/
+COPY database/ database/
+COPY public/ public/
+COPY resources/ resources/
+COPY routes/ routes/
+COPY storage/ storage/
+COPY artisan .
+COPY composer.json .
 
 RUN composer install \
     --ignore-platform-reqs \
@@ -136,7 +144,6 @@ RUN composer install \
     && composer show --tree|grep "ext-" || true
 
 COPY --from=consul-template /consul-template /usr/local/bin/
-
 COPY docker/php-fpm/consul-template.hcl /etc/consul-template/consul-template.hcl
 
 RUN if [ -n "${COMMIT}" ]; then \
@@ -164,9 +171,6 @@ CMD if [ -n "${VAULT_ADDR}" ]; then \
     else \
       php-fpm; \
     fi
-
-## Cleanup
-RUN apk del .build-deps && apk del .run-deps && rm -rf /var/cache/apk/*
 
 RUN php artisan cache:clear \
     && php artisan route:clear \
