@@ -149,13 +149,6 @@ RUN if [ -n "${VERSION}" ]; then \
       echo "VERSION: $(cat VERSION)"; \
     fi
 
-RUN php artisan cache:clear \
-    && php artisan route:clear \
-    && php artisan config:clear
-
-RUN php -m \
-    && php artisan list
-
 RUN if [ -n "${VAULT_ADDR}" ]; then \
       echo "${VAULT_ADDR}" \
         && curl --insecure "${VAULT_ADDR}/v1/pki/ca_chain" \
@@ -174,3 +167,9 @@ CMD if [ -n "${VAULT_ADDR}" ]; then \
 
 ## Cleanup
 RUN apk del .build-deps && apk del .run-deps && rm -rf /var/cache/apk/*
+
+RUN php artisan cache:clear \
+    && php artisan route:clear \
+    && php artisan config:clear \
+    && php -m \
+    && php artisan list
