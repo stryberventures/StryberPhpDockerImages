@@ -24,7 +24,12 @@ for local development based on **production** images
 Don't forget to restart container after editing configuration files :eyes:.
 
 ### Nginx
-...
+ - To modify nginx settings for ```localhost``` edit ```docker/nginx/conf.d/default.conf``` file.
+ - To modify nginx settings for ```*.local.gd``` edit ```docker/nginx/sites-available/local.gd.conf``` file.
+local.gd - service to serve localhost. DNS that always resolves to 127.0.0.1.
+ - To modify main nginx settings edit ```docker/nginx/nginx.conf```
+
+Don't forget to restart container after editing ```docker/nginx/nginx.conf``` configuration file :eyes:.
 
 ### Redis
 ...

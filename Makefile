@@ -29,8 +29,8 @@ build: ## Build docker containers
 	docker-compose up -d --build
 up-build-test: ## Setup environment for running tests via github actions
 	docker build --target $(TEST_APP_ENV) -t $(TEST_LOWER_PROJECT_NAME)-php:$(TEST_APP_ENV) -f docker/php-fpm/Dockerfile .
-	docker build --target $(TEST_APP_ENV) -t $(TEST_LOWER_PROJECT_NAME)-nginx:$(TEST_APP_ENV) -f docker/nginx/Dockerfile .
-	docker build --target $(TEST_APP_ENV) -t $(TEST_LOWER_PROJECT_NAME)-postgres:$(TEST_APP_ENV) -f docker/postgres/Dockerfile .
+	docker build -t $(TEST_LOWER_PROJECT_NAME)-nginx:$(TEST_APP_ENV) -f docker/nginx/Dockerfile .
+	docker build -t $(TEST_LOWER_PROJECT_NAME)-postgres:$(TEST_APP_ENV) -f docker/postgres/Dockerfile .
 	docker network create $(TEST_LOWER_PROJECT_NAME)-network
 	docker run --rm --network $(TEST_LOWER_PROJECT_NAME)-network --detach --name php-fpm $(TEST_LOWER_PROJECT_NAME)-php:$(TEST_APP_ENV)
 	docker run --rm --network $(TEST_LOWER_PROJECT_NAME)-network --detach --publish 80:80 $(TEST_LOWER_PROJECT_NAME)-nginx:$(TEST_APP_ENV)

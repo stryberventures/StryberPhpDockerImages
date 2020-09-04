@@ -14,7 +14,6 @@ services:
         - no_proxy
       context: .
       dockerfile: ./docker/nginx/Dockerfile
-      target: dev
     restart: on-failure
     depends_on:
       - php-fpm
@@ -45,7 +44,6 @@ services:
         $POSTGRES_VERSION: $POSTGRES_VERSION
       context: .
       dockerfile: ./docker/postgres/Dockerfile
-      target: dev
     restart: on-failure
     environment:
       - POSTGRES_DB=${DB_DATABASE}
