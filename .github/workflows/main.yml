@@ -15,7 +15,9 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           dockerfile: docker/php-fpm/Dockerfile
           registry: docker.pkg.github.com
-          labels: ${{ github.sha }}, org.opencontainers.image.revision
           repository: stryberventures/stryberphpdockerimages/stryber-php
-          tags: latest
           target: php-base
+          tags: ${{ github.sha }}, org.opencontainers.image.revision
+          tag_with_ref: true
+          tag_with_sha: true
+          add_git_labels: true
