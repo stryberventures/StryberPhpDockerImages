@@ -1,16 +1,16 @@
 ARG PHP_VERSION=7.4-fpm-alpine3.12
-ARG CONSUL_TEMPLATE_VERSION=0.25.0-scratch
 
 # ======== PHP BASE IMAGE ========
 FROM php:${PHP_VERSION} as php-base
 ARG PHPREDIS_VERSION=5.3.1
+ARG PHPIZE_DEPS
 
 ## Install composer
 RUN wget https://getcomposer.org/installer && \
     php installer --install-dir=/usr/local/bin/ --filename=composer && \
-    rm installer
-
-RUN apk update \
+    rm installer \
+    # Update the index of available packages
+    && apk update \
     # Install run dependencies
     && apk add --no-cache freetype libpng libjpeg-turbo libzip libsodium gmp libmcrypt \
     # Install build packages
@@ -33,20 +33,46 @@ RUN apk update \
     && docker-php-ext-install -j${NPROC} pdo pdo_pgsql pgsql \
     # Install php extensions
     && docker-php-ext-install -j${NPROC} zip soap intl bcmath sodium gmp redis pcntl \
-    && docker-php-ext-enable redis pcntl
+    && docker-php-ext-enable redis pcntl \
+    ## Cleanup
+    && apk del .build-deps && rm -rf /var/cache/apk/*
 
-## Cleanup
-RUN apk del .build-deps && rm -rf /var/cache/apk/*
+# ======== Test image ========
+FROM php-base AS test
+
+ARG APP_ENV="test"
+
+ENV APP_ENV=${APP_ENV}
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
+WORKDIR /laravel
+
+## Copy project files to workdir
+COPY . .
+
+## Install composer plugin that downloads packages in parallel to speed up the installation process.
+RUN composer global require hirak/prestissimo \
+    ## Install application dependencies
+    && composer install --no-interaction --optimize-autoloader
+
+## Change files owner to php-fpm default user
+RUN chown -R www-data:www-data . \
+    && chmod -R 777 /laravel/storage
+
+RUN php -m && php artisan list
 
 # ======== Dev image ========
 FROM php-base AS dev
-RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
 
 ARG APP_ENV="dev"
-ENV APP_ENV=${APP_ENV}
 
-# Install run dependencies
-RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
+ENV APP_ENV=${APP_ENV}
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
+    # Install run dependencies
+    && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
     # build tools
     autoconf g++ gcc make \
     # lib tools
@@ -60,11 +86,9 @@ WORKDIR /laravel
 COPY . .
 
 ## Install composer plugin that downloads packages in parallel to speed up the installation process.
-RUN composer global require hirak/prestissimo
-
-## Install application dependencies
-ENV COMPOSER_ALLOW_SUPERUSER=1
-RUN composer install --no-interaction --optimize-autoloader
+RUN composer global require hirak/prestissimo \
+    ## Install application dependencies
+    && composer install --no-interaction --optimize-autoloader
 
 ## Install Xdebug
 RUN yes | pecl install xdebug
@@ -82,39 +106,19 @@ RUN chown -R www-data:www-data . \
 
 ## Cleanup
 RUN apk del .build-deps && rm -rf /var/cache/apk/*
-# ======== Test image ========
-FROM php-base AS test
-RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
-ARG APP_ENV="test"
-ENV APP_ENV=${APP_ENV}
-
-WORKDIR /laravel
-
-## Copy project files to workdir
-COPY . .
-
-## Install composer plugin that downloads packages in parallel to speed up the installation process.
-RUN composer global require hirak/prestissimo
-
-## Install application dependencies
-ENV COMPOSER_ALLOW_SUPERUSER=1
-RUN composer install --no-interaction --optimize-autoloader
-
-## Change files owner to php-fpm default user
-RUN chown -R www-data:www-data . \
-    && chmod -R 777 /laravel/storage
-
-RUN php -m && php artisan list
 
 # ======== Consul Template ========
+ARG CONSUL_TEMPLATE_VERSION=0.25.0-scratch
 FROM hashicorp/consul-template:${CONSUL_TEMPLATE_VERSION} as consul-template
 
 # ======== Prod image ========
 FROM php-base AS prod
+
 ARG APP_ENV="prod"
 ARG COMMIT
 ARG VERSION
 ARG VAULT_ADDR
+
 ENV APP_ENV=${APP_ENV}
 ENV VAULT_ADDR=${VAULT_ADDR}
 
