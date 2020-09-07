@@ -13,6 +13,7 @@ jobs:
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+          dockerfile: docker/php-fpm/Dockerfile
           registry: docker.pkg.github.com
           repository: stryberventures/stryberphpdockerimages/stryber-php
           tags: latest
