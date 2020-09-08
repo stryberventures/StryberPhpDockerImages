@@ -51,7 +51,7 @@ php-fpm:
 
 # Local development
 ## Main stack
-- [x] PHP-FPM
+- [x] PHP-FPM with Xdebug
 - [x] Nginx
 - [x] Redis
 - [x] Postgres
