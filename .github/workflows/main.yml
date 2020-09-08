@@ -22,3 +22,4 @@ jobs:
           repository: stryberventures/stryberphpdockerimages/stryber-php
           target: php-base
           tag_with_sha: true
+          tag_with_ref: true
