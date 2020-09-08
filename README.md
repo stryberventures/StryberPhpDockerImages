@@ -23,7 +23,7 @@ and with the label ```php-${VERSION}```, after committing to the ```php-*``` bra
 
 ## Usage
 First you need to create [personal access token](https://github.com/settings/tokens) with **read:packages** access.
-Then you need to [authenticating with a personal access token](https://docs.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-docker-for-use-with-github-packages#authenticating-with-a-personal-access-token).
+Then you need to [authenticate with a personal access token](https://docs.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-docker-for-use-with-github-packages#authenticating-with-a-personal-access-token).
 
 Example:
 ```echo 46941ddda01faaf4f4ee3aa491b3vbnm10518gv4 | docker login https://docker.pkg.github.com -u stryber --password-stdin```
