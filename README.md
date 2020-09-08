@@ -21,6 +21,13 @@ Docker images are [building](https://github.com/stryberventures/StryberPhpDocker
 after committing to the ```master``` branch with the label ```latest```,
 and with the label ```php-${VERSION}```, after committing to the ```php-*``` branches.
 
+## Usage
+First you need to create [personal access token](https://github.com/settings/tokens) with **read:packages** access.
+Then you need to [authenticating with a personal access token](https://docs.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-docker-for-use-with-github-packages#authenticating-with-a-personal-access-token).
+
+Example:
+```echo 46941ddda01faaf4f4ee3aa491b3vbnm10518gv4 | docker login https://docker.pkg.github.com -u stryber --password-stdin```
+
 To use this docker images in your project, simply start your ```Docker``` file with importing an image from the chosen package,
 for example:
 ```FROM docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php:php-7.4```
