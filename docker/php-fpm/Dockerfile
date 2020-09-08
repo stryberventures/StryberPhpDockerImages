@@ -66,10 +66,12 @@ RUN php -m && php artisan list
 FROM php-base AS dev
 
 ARG APP_ENV="dev"
+ARG PHPIZE_DEPS
 
 ENV APP_ENV=${APP_ENV}
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
+# Install run dependencies
 RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     # Install run dependencies
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \

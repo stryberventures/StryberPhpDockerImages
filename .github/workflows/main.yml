@@ -3,9 +3,10 @@ on:
   push:
     branches:
       - master
+      - 'php-**'
 jobs:
   test:
-    name: CI
+    name: Push to GitHub Packages stryber-php
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
