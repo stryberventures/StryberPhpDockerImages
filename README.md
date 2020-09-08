@@ -1,8 +1,50 @@
-# Docker images 
-for local development based on **production** images
+# PHP-based Stryber Docker images
+This repository is used to standardize Docker containers within PHP-based Stryber projects.
 
+## PHP Docker image
+A Docker image based on the official PHP alpine images with PHP extensions and tools installed to be ready to run laravel web servers.
+
+#### PHP Extensions
+ - `pdo`
+ - `pdo_pgsql`
+ - `pgsql`
+ - `soap` 
+ - `intl` 
+ - `bcmath` 
+ - `sodium` 
+ - `gmp` 
+ - `redis` 
+ - `pcntl`
+
+## Automatic builds
+Docker images are [building](https://github.com/stryberventures/StryberPhpDockerImages/packages/388507) automatically 
+after committing to the ```master``` branch with the label ```latest```,
+and with the label ```php-${VERSION}```, after committing to the ```php-*``` branches.
+
+To use this docker images in your project, simply start your ```Docker``` file with importing an image from the chosen package,
+for example:
+```FROM docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php:php-7.4```
+
+
+## Multistage builds
+You can find examples of [stages](https://docs.docker.com/develop/develop-images/multistage-build/) for different 
+environments(test, dev, prod) inside ```docker/php-fpm/Dockerfile``` file.
+
+To build an image for a specific environment use a command like
+```docker build --target ${STAGE} -t ${TAG} -f docker/php-fpm/Dockerfile .```.
+
+In case you are using a ```docker-compose.yml``` file, pass ```target``` with the desired stage.
+```
+php-fpm:
+  build:
+    ...
+    dockerfile: ./docker/php-fpm/Dockerfile
+    target: ${APP_ENV}
+```
+
+# Local development
 ## Main stack
-- [x] PHP-FPM (uses for dev, testing and production environments)
+- [x] PHP-FPM
 - [x] Nginx
 - [x] Redis
 - [x] Postgres
@@ -15,6 +57,14 @@ for local development based on **production** images
 - [ ] Yours suggestions :heart_eyes:
 
 ---
+
+## Configuration
+Copy ```./docker``` folder to your project.
+
+Copy/adapt content from ```.env``` and ```.env.testing```(for testing environment) files to your project.
+
+Copy/adapt content from ```docker-compose.yml``` and ```docker-compose.override.yml``` files to your project.
+
 
 ### PHP-FPM
  - To modify default php settings like ```memory_limit``` edit ```docker/php-fpm/default.ini``` file.
@@ -32,10 +82,12 @@ local.gd - service to serve localhost. DNS that always resolves to 127.0.0.1.
 Don't forget to restart container after editing ```docker/nginx/nginx.conf``` configuration file :eyes:.
 
 ### Redis
-...
+Just ready to run without settings.
 
 ### Postgres
-...
+For local development, database user, password, and name are taken from environment variables ```.env``` file(or system environment variables)
+
+If you want to create another database/make some actions on DB, you can use ```docker/postgres/conf/createdb.sh``` file.
 
 ### MySql
 Do we need this ?
@@ -48,19 +100,31 @@ MailDev is a simple way to test your project's generated emails during developme
 
 
 ### phpRedisAdmin
-...
+phpRedisAdmin is a simple web interface to manage Redis databases
 
-### Supervisor
-...
+# Running tests via github actions flow
+Create ```.github/workflows/main.yml``` file with given content.
+```
+name: CI
+on: [ pull_request ]
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
-# Pushing new images to GitHub registry
-~/github_token.txt - file with [personal access token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)
+      - name: Login to github registry
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login https://docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
+      - name: Copy env
+        working-directory: .
+        run: cp .env.testing .env
+
+      - name: Run make up-build-test
+        run: make up-build-test
 
 ```
-cat ~/github_token.txt | docker login https://docker.pkg.github.com -u USER --password-stdin
-docker build --target php-base -t stryber-php:0.0.1 -f docker/php-fpm/Dockerfile .
-docker tag b7bbe48b5a01 docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php:0.0.1
-docker build --target php-base -t docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php:0.0.1 YOUR_PATH/docker/php-fpm
-docker push docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php:0.0.1
-```
+
+Copy/adapt content from ```Makefile``` file to your project.

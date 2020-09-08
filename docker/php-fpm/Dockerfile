@@ -22,7 +22,6 @@ RUN wget https://getcomposer.org/installer && \
     && curl -L -o /tmp/phpredis.tar.gz https://github.com/phpredis/phpredis/archive/${PHPREDIS_VERSION}.tar.gz \
     && tar xfz /tmp/phpredis.tar.gz \
     && rm -r /tmp/phpredis.tar.gz \
-    && ls -al \
     && mv phpredis-${PHPREDIS_VERSION} /usr/src/php/ext/redis \
     # Configure and install gd
     && NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) \
