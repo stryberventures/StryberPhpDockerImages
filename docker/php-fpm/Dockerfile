@@ -22,7 +22,6 @@ RUN wget https://getcomposer.org/installer && \
     && curl -L -o /tmp/phpredis.tar.gz https://github.com/phpredis/phpredis/archive/${PHPREDIS_VERSION}.tar.gz \
     && tar xfz /tmp/phpredis.tar.gz \
     && rm -r /tmp/phpredis.tar.gz \
-    && ls -al \
     && mv phpredis-${PHPREDIS_VERSION} /usr/src/php/ext/redis \
     # Configure and install gd
     && NPROC=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || 1) \
@@ -66,10 +65,12 @@ RUN php -m && php artisan list
 FROM php-base AS dev
 
 ARG APP_ENV="dev"
+ARG PHPIZE_DEPS
 
 ENV APP_ENV=${APP_ENV}
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
+# Install run dependencies
 RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     # Install run dependencies
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
