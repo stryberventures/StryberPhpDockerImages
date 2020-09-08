@@ -4,6 +4,8 @@ on:
     branches:
       - master
       - 'php-**'
+    paths:
+      - 'docker/php-fpm/Dockerfile'
 jobs:
   test:
     name: Push to GitHub Packages stryber-php
