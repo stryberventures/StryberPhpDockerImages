@@ -54,7 +54,7 @@ services:
     container_name: ${PROJECT_NAME}-postgres
 
   redis:
-    image: "redis:${PHPREDIS_VERSION}"
+    image: "redis:${REDIS_IMAGE_VERSION}"
     command: |
       bash -c "redis-server"
     networks:
