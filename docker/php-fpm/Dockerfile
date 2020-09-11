@@ -1,6 +1,10 @@
 ARG PHP_VERSION=7.4-fpm-alpine3.12
+ARG CONSUL_TEMPLATE_VERSION=0.25.0-scratch
 
-# ======== PHP BASE IMAGE ========
+#
+# BASE IMAGE
+#
+
 FROM php:${PHP_VERSION} as php-base
 ARG PHPREDIS_VERSION=5.3.1
 ARG PHPIZE_DEPS
@@ -36,17 +40,21 @@ RUN wget https://getcomposer.org/installer && \
     ## Cleanup
     && apk del .build-deps && rm -rf /var/cache/apk/*
 
-# ======== Test image ========
+#
+# TEST IMAGE
+#
+
 FROM php-base AS test
 
 ARG APP_ENV="test"
 
 ENV APP_ENV=${APP_ENV}
 ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_MEMORY_LIMIT=-1
 
 RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
-WORKDIR /laravel
 
+WORKDIR /laravel
 ## Copy project files to workdir
 COPY . .
 
@@ -59,9 +67,13 @@ RUN composer global require hirak/prestissimo \
 RUN chown -R www-data:www-data . \
     && chmod -R 777 /laravel/storage
 
-RUN php -m && php artisan list
+RUN php -m \
+    && php artisan list
 
-# ======== Dev image ========
+#
+# DEV IMAGE
+#
+
 FROM php-base AS dev
 
 ARG APP_ENV="dev"
@@ -69,6 +81,7 @@ ARG PHPIZE_DEPS
 
 ENV APP_ENV=${APP_ENV}
 ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_MEMORY_LIMIT=-1
 
 # Install run dependencies
 RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
@@ -82,7 +95,6 @@ RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     libpng-dev libxslt-dev libzip-dev
 
 WORKDIR /laravel
-
 ## Copy project files to workdir
 COPY . .
 
@@ -106,13 +118,27 @@ RUN chown -R www-data:www-data . \
     && chmod -R 777 /laravel/storage
 
 ## Cleanup
-RUN apk del .build-deps && rm -rf /var/cache/apk/*
+RUN apk del .build-deps \
+    && rm -rf /var/cache/apk/*
 
-# ======== Consul Template ========
-ARG CONSUL_TEMPLATE_VERSION=0.25.0-scratch
+#
+# LOCAL IMAGE
+#
+
+FROM dev AS local
+
+ARG APP_ENV=local
+ARG PHPIZE_DEPS
+
+ENV APP_ENV=${APP_ENV}
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_MEMORY_LIMIT=-1
+
+#
+# PROD IMAGE
+#
+
 FROM hashicorp/consul-template:${CONSUL_TEMPLATE_VERSION} as consul-template
-
-# ======== Prod image ========
 FROM php-base AS prod
 
 ARG APP_ENV="prod"
@@ -122,8 +148,12 @@ ARG VAULT_ADDR
 
 ENV APP_ENV=${APP_ENV}
 ENV VAULT_ADDR=${VAULT_ADDR}
+ENV COMPOSER_MEMORY_LIMIT=-1
 
 RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
+
+COPY --from=consul-template /consul-template /usr/local/bin/
+COPY docker/php-fpm/consul-template.hcl /etc/consul-template/consul-template.hcl
 
 WORKDIR /laravel
 
@@ -149,9 +179,6 @@ RUN composer install \
     --no-dev \
     && composer show --tree|grep "ext-" || true
 
-COPY --from=consul-template /consul-template /usr/local/bin/
-COPY docker/php-fpm/consul-template.hcl /etc/consul-template/consul-template.hcl
-
 RUN if [ -n "${COMMIT}" ]; then \
       printf '%s' "${COMMIT}" > "COMMIT"; \
       echo "COMMIT: $(cat COMMIT)"; \
@@ -169,6 +196,12 @@ RUN if [ -n "${VAULT_ADDR}" ]; then \
         && update-ca-certificates; \
     fi
 
+RUN php artisan cache:clear \
+    && php artisan route:clear \
+    && php artisan config:clear \
+    && php -m \
+    && php artisan list
+
 CMD if [ -n "${VAULT_ADDR}" ]; then \
       echo "${VAULT_ADDR}" \
         && consul-template \
@@ -177,9 +210,3 @@ CMD if [ -n "${VAULT_ADDR}" ]; then \
     else \
       php-fpm; \
     fi
-
-RUN php artisan cache:clear \
-    && php artisan route:clear \
-    && php artisan config:clear \
-    && php -m \
-    && php artisan list
