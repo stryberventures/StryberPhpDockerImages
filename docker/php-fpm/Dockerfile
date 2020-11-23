@@ -58,10 +58,8 @@ WORKDIR /laravel
 ## Copy project files to workdir
 COPY . .
 
-## Install composer plugin that downloads packages in parallel to speed up the installation process.
-RUN composer global require hirak/prestissimo \
-    ## Install application dependencies
-    && composer install --no-interaction --optimize-autoloader
+## Install application dependencies
+RUN composer install --no-interaction --optimize-autoloader
 
 ## Change files owner to php-fpm default user
 RUN chown -R www-data:www-data . \
@@ -98,10 +96,8 @@ WORKDIR /laravel
 ## Copy project files to workdir
 COPY . .
 
-## Install composer plugin that downloads packages in parallel to speed up the installation process.
-RUN composer global require hirak/prestissimo \
-    ## Install application dependencies
-    && composer install --no-interaction --optimize-autoloader
+## Install application dependencies
+RUN composer install --no-interaction --optimize-autoloader
 
 ## Install Xdebug
 RUN yes | pecl install xdebug
