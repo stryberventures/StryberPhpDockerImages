@@ -16,7 +16,7 @@ RUN wget https://getcomposer.org/installer && \
     # Update the index of available packages
     && apk update \
     # Install run dependencies
-    && apk add --no-cache freetype libpng libjpeg-turbo libzip libsodium gmp libmcrypt git openssl \
+    && apk add --no-cache freetype libpng libjpeg-turbo libzip libsodium gmp libmcrypt git openssh \
     # Install build packages
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS freetype-dev libpng-dev libjpeg-turbo-dev zlib-dev libzip-dev \
        libxml2-dev libsodium-dev gmp-dev libmcrypt-dev \
