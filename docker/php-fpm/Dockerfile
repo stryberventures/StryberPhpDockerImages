@@ -90,7 +90,7 @@ RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     #  libmcrypt-dev
     libpng-dev libxslt-dev libzip-dev \
     # Enable development php.ini
-    && mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" \
+    && mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
 WORKDIR /laravel
 ## Copy project files to workdir
