@@ -27,6 +27,7 @@ services:
         PHP_VERSION: $PHP_VERSION
         PHPREDIS_VERSION: $PHPREDIS_VERSION
         APP_ENV: $APP_ENV
+        XDEBUG_VERSION: $XDEBUG_VERSION
       context: .
       dockerfile: ./docker/php-fpm/Dockerfile
       target: ${APP_ENV}
