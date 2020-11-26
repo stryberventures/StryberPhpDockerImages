@@ -7,7 +7,6 @@ ARG CONSUL_TEMPLATE_VERSION=0.25.0-scratch
 
 FROM php:${PHP_VERSION} as php-base
 ARG PHPREDIS_VERSION=5.3.1
-ARG PHPIZE_DEPS
 
 ## Install composer
 RUN wget https://getcomposer.org/installer && \
@@ -37,6 +36,8 @@ RUN wget https://getcomposer.org/installer && \
     # Install php extensions
     && docker-php-ext-install -j${NPROC} zip soap intl bcmath sodium gmp redis pcntl \
     && docker-php-ext-enable redis pcntl \
+    # Enable production php.ini
+    && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
     ## Cleanup
     && apk del .build-deps && rm -rf /var/cache/apk/*
 
@@ -75,7 +76,6 @@ RUN php -m \
 FROM php-base AS dev
 
 ARG APP_ENV="dev"
-ARG PHPIZE_DEPS
 
 ENV APP_ENV=${APP_ENV}
 ENV COMPOSER_ALLOW_SUPERUSER=1
@@ -85,12 +85,12 @@ ENV COMPOSER_MEMORY_LIMIT=-1
 RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     # Install run dependencies
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
-    # build tools
-    autoconf g++ gcc make \
     # lib tools
     bzip2-dev freetype-dev gettext-dev icu-dev imagemagick-dev libintl libjpeg-turbo-dev \
     #  libmcrypt-dev
-    libpng-dev libxslt-dev libzip-dev
+    libpng-dev libxslt-dev libzip-dev \
+    # Enable development php.ini
+    && mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" \
 
 WORKDIR /laravel
 ## Copy project files to workdir
@@ -124,7 +124,6 @@ RUN apk del .build-deps \
 FROM dev AS local
 
 ARG APP_ENV=local
-ARG PHPIZE_DEPS
 
 ENV APP_ENV=${APP_ENV}
 ENV COMPOSER_ALLOW_SUPERUSER=1
@@ -137,12 +136,10 @@ ENV COMPOSER_MEMORY_LIMIT=-1
 FROM hashicorp/consul-template:${CONSUL_TEMPLATE_VERSION} as consul-template
 FROM php-base AS prod
 
-ARG APP_ENV="prod"
 ARG COMMIT
 ARG VERSION
 ARG VAULT_ADDR
 
-ENV APP_ENV=${APP_ENV}
 ENV VAULT_ADDR=${VAULT_ADDR}
 ENV COMPOSER_MEMORY_LIMIT=-1
 
