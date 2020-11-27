@@ -37,8 +37,9 @@ jobs:
         run: branch=${{ steps.extract_branc.outputs.branch }}
           && echo "The branch name is ${branch//master/latest}"
 
-#      - name: Build and push PHP Docker images
-#        uses: docker/build-push-action@v1
+      - name: Build and push PHP Docker images
+        uses: docker/build-push-action@v1
+        run: echo branch
 #        with:
 #          username: ${{ github.actor }}
 #          password: ${{ secrets.GITHUB_TOKEN }}
