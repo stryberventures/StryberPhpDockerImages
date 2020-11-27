@@ -23,7 +23,7 @@ jobs:
       # save branch name to env.action_state
       - name: Get branch name
         run: branch=${{ steps.extract_branc.outputs.branch }}
-          && echo "action_state=${branch//master/latest}" >> $GITHUB_ENV
+          && echo "branch=${branch//master/latest}" >> $GITHUB_ENV
 
       - name: Test variable
         run: echo "stryberventures/stryberphpdockerimages/stryber-${{ env.action_state }}"
@@ -37,4 +37,4 @@ jobs:
           registry: docker.pkg.github.com
           repository: stryberventures/stryberphpdockerimages/stryber-${{ env.action_state }}
           target: php-base
-          tag_with_ref: false
+          tag_with_ref: true
