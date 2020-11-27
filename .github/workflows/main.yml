@@ -2,7 +2,7 @@ name: CI
 on:
   push:
     branches:
-      - master
+#      - master
       - 'php-**'
     paths:
       - 'docker/php-fpm/Dockerfile'
@@ -40,13 +40,13 @@ jobs:
       - name: Test variable
         run: echo $action_state
 
-#      - name: Build and push PHP Docker images
-#        uses: docker/build-push-action@v1
-#        with:
-#          username: ${{ github.actor }}
-#          password: ${{ secrets.GITHUB_TOKEN }}
-#          dockerfile: docker/php-fpm/Dockerfile
-#          registry: docker.pkg.github.com
-#          repository: stryberventures/stryberphpdockerimages/stryber-php
-#          target: php-base
-#          tag_with_ref: true
+      - name: Build and push PHP Docker images
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          dockerfile: docker/php-fpm/Dockerfile
+          registry: docker.pkg.github.com
+          repository: stryberventures/stryberphpdockerimages/stryber-php-$action_state
+          target: php-base
+          tag_with_ref: true
