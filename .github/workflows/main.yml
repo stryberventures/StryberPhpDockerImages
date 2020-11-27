@@ -25,21 +25,16 @@ jobs:
         run: branch=${{ steps.extract_branc.outputs.branch }}
           && echo "branch=${branch//master/latest}" >> $GITHUB_ENV
 
-      - name: Test variable
+      - name: Repository variable
         run: echo "repository=stryberventures/stryberphpdockerimages/stryber-${{ env.branch }}" >> $GITHUB_ENV
-          && echo repository
 
-      - name: Test env variable
-        run: echo "repository=stryberventures/stryberphpdockerimages/stryber-${{ env.branch }}" >> $GITHUB_ENV
-          && echo ${{ env.repository }}
-
-#      - name: Build and push PHP Docker images
-#        uses: docker/build-push-action@v1
-#        with:
-#          username: ${{ github.actor }}
-#          password: ${{ secrets.GITHUB_TOKEN }}
-#          dockerfile: docker/php-fpm/Dockerfile
-#          registry: docker.pkg.github.com
-#          repository: stryberventures/stryberphpdockerimages/stryber-${{ env.branch }}
-#          target: php-base
-#          tag_with_ref: true
+      - name: Build and push PHP Docker images
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          dockerfile: docker/php-fpm/Dockerfile
+          registry: docker.pkg.github.com
+          repository: ${{ env.branch }}
+          target: php-base
+          tag_with_ref: true
