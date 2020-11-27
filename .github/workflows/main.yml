@@ -26,7 +26,7 @@ jobs:
           && echo "branch=${branch//master/latest}" >> $GITHUB_ENV
 
       - name: Repository variable
-        run: echo "repository=stryberventures/stryberphpdockerimages/stryber-${{ env.branch }}" >> $GITHUB_ENV
+        run: echo "repository=docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-${{ env.branch }}" >> $GITHUB_ENV
 
       - name: Build and push PHP Docker images
         uses: docker/build-push-action@v1
