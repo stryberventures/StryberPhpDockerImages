@@ -35,7 +35,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           dockerfile: docker/php-fpm/Dockerfile
           registry: docker.pkg.github.com
-          repository: ${{ env.branch }}
+          repository: "${{ env.branch }}"
           target: php-base
           tag_with_ref: false
           tags: latest
