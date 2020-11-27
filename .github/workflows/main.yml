@@ -38,7 +38,7 @@ jobs:
           && echo "action_state=${branch//master/latest}" >> $GITHUB_ENV
 
       - name: Test variable
-        run: echo $action_state ${action_state} ${{ action_state }}
+        run: echo $action_state
 
 #      - name: Build and push PHP Docker images
 #        uses: docker/build-push-action@v1
