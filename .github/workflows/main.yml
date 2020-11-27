@@ -34,7 +34,7 @@ jobs:
 
       # print branch name
       - name: Get branch name
-        run: echo 'The branch name is' ${${{ steps.extract_branc.outputs.branch }}//master/latest}
+        run: echo 'The branch name is' ${${steps.extract_branc.outputs.branch}//master/latest}
 
 #      - name: Build and push PHP Docker images
 #        uses: docker/build-push-action@v1
