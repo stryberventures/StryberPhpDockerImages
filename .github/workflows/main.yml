@@ -37,4 +37,4 @@ jobs:
           registry: docker.pkg.github.com
           repository: ${{ env.branch }}
           target: php-base
-          tag_with_ref: true
+          tag_with_ref: false
