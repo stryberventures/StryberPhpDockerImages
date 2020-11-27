@@ -8,6 +8,7 @@ ARG CONSUL_TEMPLATE_VERSION=0.25.0-scratch
 FROM php:${PHP_VERSION} as php-base
 ARG PHPREDIS_VERSION=5.3.1
 
+
 ## Install composer
 RUN wget https://getcomposer.org/installer && \
     php installer --install-dir=/usr/local/bin/ --filename=composer && \
