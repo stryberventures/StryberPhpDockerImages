@@ -38,15 +38,15 @@ jobs:
           && echo "action_state=${branch//master/latest}" >> $GITHUB_ENV
 
       - name: Test variable
-        run: echo $action_state
+        run: echo ${{ env.action_state }}
 
-      - name: Build and push PHP Docker images
-        uses: docker/build-push-action@v1
-        with:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          dockerfile: docker/php-fpm/Dockerfile
-          registry: docker.pkg.github.com
-          repository: stryberventures/stryberphpdockerimages/stryber-php-test
-          target: php-base
-          tag_with_ref: false
+#      - name: Build and push PHP Docker images
+#        uses: docker/build-push-action@v1
+#        with:
+#          username: ${{ github.actor }}
+#          password: ${{ secrets.GITHUB_TOKEN }}
+#          dockerfile: docker/php-fpm/Dockerfile
+#          registry: docker.pkg.github.com
+#          repository: stryberventures/stryberphpdockerimages/stryber-${{ env.action_state }}
+#          target: php-base
+#          tag_with_ref: false
