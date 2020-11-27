@@ -19,20 +19,8 @@ jobs:
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branc
 
-#      # extract branch name
-#      - name: Extract branch name
-#        if: github.event_name != 'pull_request'
-#        shell: bash
-#        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $BRANCH_NAME
-#        id: extract_branch
-#
-#      # extract branch name on pull request
-#      - name: Print branch name
-#        if: github.event_name == 'pull_request'
-#        shell: bash
-#        run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF})" >> $BRANCH_NAME
-
-      # print branch name
+      # replace master to latest in branch name
+      # save branch name to env.action_state
       - name: Get branch name
         run: branch=${{ steps.extract_branc.outputs.branch }}
           && echo "action_state=${branch//master/latest}" >> $GITHUB_ENV
@@ -40,13 +28,13 @@ jobs:
       - name: Test variable
         run: echo ${{ env.action_state }}
 
-#      - name: Build and push PHP Docker images
-#        uses: docker/build-push-action@v1
-#        with:
-#          username: ${{ github.actor }}
-#          password: ${{ secrets.GITHUB_TOKEN }}
-#          dockerfile: docker/php-fpm/Dockerfile
-#          registry: docker.pkg.github.com
-#          repository: stryberventures/stryberphpdockerimages/stryber-${{ env.action_state }}
-#          target: php-base
-#          tag_with_ref: false
+      - name: Build and push PHP Docker images
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          dockerfile: docker/php-fpm/Dockerfile
+          registry: docker.pkg.github.com
+          repository: stryberventures/stryberphpdockerimages/stryber-${{ env.action_state }}
+          target: php-base
+          tag_with_ref: false
