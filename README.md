@@ -1,6 +1,8 @@
 # PHP-based Stryber Docker images
 This repository is used to standardize Docker containers within PHP-based Stryber projects.
 
+# :exclamation: To view the repository code, go to the desired php branch(php-7.4, php-8.0, etc...) 
+
 ## PHP Docker image
 A Docker image based on the official PHP alpine images with PHP extensions and tools installed to be ready to run laravel web servers.
 
@@ -17,9 +19,8 @@ A Docker image based on the official PHP alpine images with PHP extensions and t
  - `pcntl`
 
 ## Automatic builds
-Docker images are [building](https://github.com/stryberventures/StryberPhpDockerImages/packages/388507) automatically 
-after committing to the ```master``` branch with the label ```latest```,
-and with the label ```php-${VERSION}```, after committing to the ```php-*``` branches.
+Docker images are [building](https://github.com/orgs/stryberventures/packages) automatically 
+after committing to the ```php-${VERSION}``` branch with the label ```latest```.
 
 ## Usage
 First you need to create [personal access token](https://github.com/settings/tokens) with **read:packages** access.
