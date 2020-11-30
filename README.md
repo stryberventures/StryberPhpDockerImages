@@ -31,7 +31,7 @@ Example:
 
 To use this docker images in your project, simply start your ```Docker``` file with importing an image from the chosen package,
 for example:
-```FROM docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php:php-7.4```
+```FROM docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php-7.4:latest```
 
 
 ## Multistage builds
