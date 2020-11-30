@@ -19,13 +19,11 @@ jobs:
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branc
 
-      # replace master to latest in branch name
-      # save branch name to env.action_state
-      - name: Get branch name
+      - name: Save branch name to env variable
         run: branch=${{ steps.extract_branc.outputs.branch }}
           && echo "BRANCH=${branch//master/latest}" >> $GITHUB_ENV
 
-      - name: Repository variable
+      - name: Add repository variable
         run: echo "INPUT_REPOSITORY=stryberventures/stryberphpdockerimages/stryber-${{ env.BRANCH }}" >> $GITHUB_ENV
 
       - name: Build and push PHP Docker images
