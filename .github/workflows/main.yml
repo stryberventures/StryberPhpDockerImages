@@ -23,10 +23,10 @@ jobs:
       # save branch name to env.action_state
       - name: Get branch name
         run: branch=${{ steps.extract_branc.outputs.branch }}
-          && echo "branch=${branch//master/latest}" >> $GITHUB_ENV
+          && echo "BRANCH=${branch//master/latest}" >> $GITHUB_ENV
 
       - name: Repository variable
-        run: echo "repository=stryberventures/stryberphpdockerimages/stryber-${{ env.branch }}" >> $GITHUB_ENV
+        run: echo "INPUT_REPOSITORY=stryberventures/stryberphpdockerimages/stryber-${{ env.BRANCH }}" >> $GITHUB_ENV
 
       - name: Build and push PHP Docker images
         uses: docker/build-push-action@v1
@@ -35,7 +35,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           dockerfile: docker/php-fpm/Dockerfile
           registry: docker.pkg.github.com
-          repository: "${{ env.branch }}"
+          repository: "${{ env.INPUT_REPOSITORY }}"
           target: php-base
           tag_with_ref: false
           tags: latest
