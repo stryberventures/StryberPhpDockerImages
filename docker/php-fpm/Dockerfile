@@ -1,4 +1,4 @@
-ARG PHP_VERSION=7.4-fpm-alpine
+ARG PHP_VERSION=8.0-fpm-alpine
 ARG CONSUL_TEMPLATE_VERSION=0.25.0-scratch
 
 #
@@ -6,7 +6,7 @@ ARG CONSUL_TEMPLATE_VERSION=0.25.0-scratch
 #
 
 FROM php:${PHP_VERSION} as php-base
-ARG PHPREDIS_VERSION=5.3.1
+ARG PHPREDIS_VERSION=5.3.2
 
 ## Install composer
 RUN wget https://getcomposer.org/installer && \
@@ -76,7 +76,7 @@ RUN php -m \
 FROM php-base AS dev
 
 ARG APP_ENV="dev"
-ARG XDEBUG_VERSION=2.9.8
+ARG XDEBUG_VERSION=3.0.0
 
 ENV APP_ENV=${APP_ENV}
 ENV COMPOSER_ALLOW_SUPERUSER=1
@@ -100,12 +100,8 @@ COPY ./docker/php-fpm/pool.conf /usr/local/etc/php-fpm.d/www.conf
 COPY ./docker/php-fpm/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 # Install Xdebug
-RUN set -ex && mkdir -p /usr/src/php/ext/xdebug \
-    && curl -fsSL https://pecl.php.net/get/xdebug-${XDEBUG_VERSION} | tar xvz -C "/usr/src/php/ext/xdebug" --strip 1 \
-    && docker-php-ext-install xdebug
-
-#RUN yes | pecl install xdebug \
-#    && docker-php-ext-enable xdebug
+RUN yes | pecl install xdebug-${XDEBUG_VERSION} \
+    && docker-php-ext-enable xdebug
 
 WORKDIR /laravel
 ## Copy project files to workdir
