@@ -2,12 +2,11 @@ name: CI
 on:
   push:
     branches:
-#      - master
       - 'php-**'
     paths:
-      - 'docker/php-fpm/Dockerfile'
+      - 'Dockerfile'
 jobs:
-  test:
+  build:
     name: Push to GitHub Packages stryber-php
     runs-on: ubuntu-latest
     steps:
@@ -26,14 +25,21 @@ jobs:
       - name: Add repository variable
         run: echo "INPUT_REPOSITORY=stryberventures/stryberphpdockerimages/stryber-${{ env.BRANCH }}" >> $GITHUB_ENV
 
-      - name: Build and push PHP Docker images
+      - name: Build and push PHP base Docker images
         uses: docker/build-push-action@v1
-        with:
+        with: &with
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          dockerfile: docker/php-fpm/Dockerfile
+          dockerfile: Dockerfile
           registry: docker.pkg.github.com
           repository: "${{ env.INPUT_REPOSITORY }}"
           target: php-base
           tag_with_ref: false
           tags: latest
+
+      - name: Build and push PHP dev Docker images
+        uses: docker/build-push-action@v1
+        with:
+          <<: *with
+          target: dev
+          tags: dev
