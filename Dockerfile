@@ -5,7 +5,7 @@ ARG CONSUL_TEMPLATE_VERSION=0.25.0-scratch
 # BASE IMAGE
 #
 
-FROM php:${PHP_VERSION} as php-base
+FROM php:${PHP_VERSION} as base
 ARG PHPREDIS_VERSION=5.3.2
 
 ## Install composer
@@ -42,7 +42,7 @@ RUN apk update \
 ## DEV IMAGE
 ##
 #
-FROM php-base AS dev
+FROM base AS dev
 
 ARG XDEBUG_VERSION=3.0.1
 
