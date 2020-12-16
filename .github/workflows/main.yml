@@ -27,7 +27,7 @@ jobs:
 
       - name: Build and push PHP base Docker images
         uses: docker/build-push-action@v1
-        with: &with
+        with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           dockerfile: Dockerfile
@@ -40,6 +40,11 @@ jobs:
       - name: Build and push PHP dev Docker images
         uses: docker/build-push-action@v1
         with:
-          <<: *with
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          dockerfile: Dockerfile
+          registry: docker.pkg.github.com
+          repository: "${{ env.INPUT_REPOSITORY }}"
+          tag_with_ref: false
           target: dev
           tags: dev
