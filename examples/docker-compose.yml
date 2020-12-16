@@ -22,19 +22,13 @@ services:
     container_name: ${PROJECT_NAME}-nginx
 
   php-fpm:
-    build:
-      args:
-        PHP_VERSION: $PHP_VERSION
-        PHPREDIS_VERSION: $PHPREDIS_VERSION
-        APP_ENV: $APP_ENV
-        XDEBUG_VERSION: $XDEBUG_VERSION
-      context: .
-      dockerfile: ./docker/php-fpm/Dockerfile
-      target: ${APP_ENV}
+    image: docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php-8.0:dev
     environment:
       - COMPOSER_MEMORY_LIMIT=-1
     restart: on-failure
-    command: sh -c 'composer install --no-interaction --optimize-autoloader && php-fpm'
+    command: sh -c 'php-fpm'
+    depends_on:
+      - postgres
     networks:
       - web-network
     container_name: ${PROJECT_NAME}-php
@@ -44,7 +38,7 @@ services:
       args:
         $POSTGRES_VERSION: $POSTGRES_VERSION
       context: .
-      dockerfile: ./docker/postgres/Dockerfile
+      dockerfile: docker/postgres/Dockerfile
     restart: on-failure
     environment:
       - POSTGRES_DB=${DB_DATABASE}
@@ -64,7 +58,7 @@ services:
 
   redis-webui:
     build:
-      context: ./docker/redis-webui
+      context: docker/redis-webui
     environment:
       - ADMIN_USER=${REDIS_WEBUI_USERNAME}
       - ADMIN_PASS=${REDIS_WEBUI_PASSWORD}
@@ -74,8 +68,10 @@ services:
       - web-network
     depends_on:
       - redis
+    container_name: ${PROJECT_NAME}-redis-webui
 
   maildev:
-    build: ./docker/maildev
+    build: docker/maildev
     networks:
       - web-network
+    container_name: ${PROJECT_NAME}-maildev

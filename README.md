@@ -1,8 +1,6 @@
 # PHP-based Stryber Docker images
 This repository is used to standardize Docker containers within PHP-based Stryber projects.
 
-# :exclamation: To view the repository code, go to the desired php branch(php-7.4, php-8.0, etc...) 
-
 ## PHP Docker image
 A Docker image based on the official PHP alpine images with PHP extensions and tools installed to be ready to run laravel web servers.
 
@@ -20,7 +18,7 @@ A Docker image based on the official PHP alpine images with PHP extensions and t
 
 ## Automatic builds
 Docker images are [building](https://github.com/orgs/stryberventures/packages) automatically 
-after committing to the ```php-${VERSION}``` branch with the label ```latest```.
+after committing to the ```php-${VERSION}``` branch with the labels ```latest``` and ```dev```.
 
 ## Usage
 First you need to create [personal access token](https://github.com/settings/tokens) with **read:packages** access.
@@ -31,22 +29,27 @@ Example:
 
 To use this docker images in your project, simply start your ```Docker``` file with importing an image from the chosen package,
 for example:
-```FROM docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php-7.4:latest```
-
+```FROM docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php-8.0:dev```
+or in ```docker-compose.yml```:
+```
+php-fpm:
+    image: docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php-8.0:dev
+```
+To use full infrastructure simply copy ```examples``` folder to the root of your project
 
 ## Multistage builds
 You can find examples of [stages](https://docs.docker.com/develop/develop-images/multistage-build/) for different 
-environments(test, dev, prod) inside ```docker/php-fpm/Dockerfile``` file.
+environments(test, dev, prod) inside ```Dockerfile``` file.
 
 To build an image for a specific environment use a command like
-```docker build --target ${STAGE} -t ${TAG} -f docker/php-fpm/Dockerfile .```.
+```docker build --target ${STAGE} -t ${TAG} -f Dockerfile .```.
 
 In case you are using a ```docker-compose.yml``` file, pass ```target``` with the desired stage.
 ```
 php-fpm:
   build:
     ...
-    dockerfile: ./docker/php-fpm/Dockerfile
+    dockerfile: ./Dockerfile
     target: ${APP_ENV}
 ```
 
