@@ -58,10 +58,10 @@ RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
 ## Copy php default configuration
-COPY ./docker/php-fpm/default.ini /usr/local/etc/php/conf.d/
-COPY ./docker/php-fpm/pool.conf /usr/local/etc/php-fpm.d/www.conf
+COPY ./config/default.ini /usr/local/etc/php/conf.d/
+COPY ./config/pool.conf /usr/local/etc/php-fpm.d/www.conf
 ## Copy php default configuration
-COPY ./docker/php-fpm/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+COPY ./config/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 # Install Xdebug
 RUN yes | pecl install xdebug-${XDEBUG_VERSION} \
