@@ -45,8 +45,6 @@ RUN apk update \
 FROM php-base AS dev
 
 ARG XDEBUG_VERSION=3.0.1
-ENV COMPOSER_ALLOW_SUPERUSER=1
-ENV COMPOSER_MEMORY_LIMIT=-1
 
 # Install run dependencies
 RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
