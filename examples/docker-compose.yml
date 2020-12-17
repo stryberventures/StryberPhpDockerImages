@@ -22,7 +22,7 @@ services:
     container_name: ${PROJECT_NAME}-nginx
 
   php-fpm:
-    image: docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php-8.0:dev
+    image: docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php-8.0-dev:dev
     environment:
       - COMPOSER_MEMORY_LIMIT=-1
     restart: on-failure
