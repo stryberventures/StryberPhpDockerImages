@@ -8,12 +8,8 @@ ARG CONSUL_TEMPLATE_VERSION=0.25.0-scratch
 FROM php:${PHP_VERSION} as php-base
 ARG PHPREDIS_VERSION=5.3.1
 
-## Install composer
-RUN wget https://getcomposer.org/installer && \
-    php installer --install-dir=/usr/local/bin/ --filename=composer && \
-    rm installer \
-    # Update the index of available packages
-    && apk update \
+# Update the index of available packages
+RUN apk update \
     # Install run dependencies
     && apk add --no-cache freetype libpng libjpeg-turbo libzip libsodium gmp libmcrypt git openssh \
     # Install build packages
@@ -61,9 +57,6 @@ WORKDIR /laravel
 ## Copy project files to workdir
 COPY . .
 
-## Install application dependencies
-RUN composer install --no-interaction --optimize-autoloader
-
 ## Change files owner to php-fpm default user
 RUN chown -R www-data:www-data . \
     && chmod -R 777 /laravel/storage
@@ -109,9 +102,6 @@ RUN set -ex && mkdir -p /usr/src/php/ext/xdebug \
 WORKDIR /laravel
 ## Copy project files to workdir
 COPY . .
-
-## Install application dependencies
-RUN composer install --no-interaction --optimize-autoloader
 
 ## Change files owner to php-fpm default user
 RUN chown -R www-data:www-data . \
