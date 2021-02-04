@@ -40,31 +40,6 @@ RUN apk update \
     && apk del .build-deps && rm -rf /var/cache/apk/*
 
 #
-# TEST IMAGE
-#
-
-FROM php-base AS test
-
-ARG APP_ENV="test"
-
-ENV APP_ENV=${APP_ENV}
-ENV COMPOSER_ALLOW_SUPERUSER=1
-ENV COMPOSER_MEMORY_LIMIT=-1
-
-RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
-
-WORKDIR /laravel
-## Copy project files to workdir
-COPY . .
-
-## Change files owner to php-fpm default user
-RUN chown -R www-data:www-data . \
-    && chmod -R 777 /laravel/storage
-
-RUN php -m \
-    && php artisan list
-
-#
 # DEV IMAGE
 #
 
@@ -106,6 +81,31 @@ COPY . .
 ## Cleanup
 RUN apk del .build-deps \
     && rm -rf /var/cache/apk/*
+
+#
+# TEST IMAGE
+#
+
+FROM php-base AS test
+
+ARG APP_ENV="test"
+
+ENV APP_ENV=${APP_ENV}
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_MEMORY_LIMIT=-1
+
+RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
+
+WORKDIR /laravel
+## Copy project files to workdir
+COPY . .
+
+## Change files owner to php-fpm default user
+RUN chown -R www-data:www-data . \
+    && chmod -R 777 /laravel/storage
+
+RUN php -m \
+    && php artisan listlaravel/storage
 
 #
 # LOCAL IMAGE
