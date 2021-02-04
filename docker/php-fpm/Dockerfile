@@ -15,7 +15,7 @@ RUN wget https://getcomposer.org/installer && \
     # Update the index of available packages
     && apk update \
     # Install run dependencies
-    && apk add --no-cache freetype libpng libjpeg-turbo libzip libsodium gmp libmcrypt git openssh \
+    && apk add --no-cache freetype libpng libjpeg-turbo libzip libsodium gmp libmcrypt git openssh libssl-dev \
     # Install build packages
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS freetype-dev libpng-dev libjpeg-turbo-dev zlib-dev libzip-dev \
        libxml2-dev libsodium-dev gmp-dev libmcrypt-dev \
@@ -34,8 +34,8 @@ RUN wget https://getcomposer.org/installer && \
     # Install Postgre PDO
     && docker-php-ext-install -j${NPROC} pdo pdo_pgsql pgsql \
     # Install php extensions
-    && docker-php-ext-install -j${NPROC} zip soap intl bcmath sodium gmp redis pcntl \
-    && docker-php-ext-enable redis pcntl \
+    && docker-php-ext-install -j${NPROC} zip soap intl bcmath sodium gmp redis pcntl mongodb \
+    && docker-php-ext-enable redis pcntl mongodb \
     # Enable production php.ini
     && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
     ## Cleanup
@@ -76,7 +76,7 @@ RUN php -m \
 FROM php-base AS dev
 
 ARG APP_ENV="dev"
-ARG XDEBUG_VERSION=2.9.8
+ARG XDEBUG_VERSION=3.0.2
 
 ENV APP_ENV=${APP_ENV}
 ENV COMPOSER_ALLOW_SUPERUSER=1

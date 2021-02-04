@@ -20,6 +20,23 @@ services:
       - ./docker/postgres/conf/:/docker-entrypoint-initdb.d/
       - ./docker/postgres/data/:/var/lib/postgresql/data/
 
+  mongodb:
+    ports:
+      - "27017:27017"
+
+  elasticsearch:
+    volumes:
+      - ./docker/elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    ports:
+      - ${ELASTICSEARCH_PORT}:9200
+      - "9300:9300"
+
+  kibana:
+    volumes:
+      - ./docker/elk/kibana/config/:/usr/share/kibana/config:ro
+    ports:
+      - "5601:5601"
+
   redis:
     volumes:
       - ./docker/redis/data/:/data

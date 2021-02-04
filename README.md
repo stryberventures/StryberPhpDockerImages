@@ -17,6 +17,7 @@ A Docker image based on the official PHP alpine images with PHP extensions and t
  - `gmp` 
  - `redis` 
  - `pcntl`
+ - `mongodb`
 
 ## Automatic builds
 Docker images are [building](https://github.com/orgs/stryberventures/packages) automatically 
@@ -31,7 +32,7 @@ Example:
 
 To use this docker images in your project, simply start your ```Docker``` file with importing an image from the chosen package,
 for example:
-```FROM docker.pkg.github.com/stryberventures/stryberphpdockerimages/stryber-php-7.4:latest```
+```FROM docker.pkg.github.com/stryberventures/stryberphpdockerimages/php-8.0-with-mongodb-and-elk:latest```
 
 
 ## Multistage builds
@@ -48,6 +49,21 @@ php-fpm:
     ...
     dockerfile: ./docker/php-fpm/Dockerfile
     target: ${APP_ENV}
+```
+or
+```
+php-fpm:
+  image: docker.pkg.github.com/stryberventures/stryberphpdockerimages/php-8.0-with-mongodb-and-elk:dev
+  environment:
+    - COMPOSER_MEMORY_LIMIT=-1
+  restart: on-failure
+  command: sh -c 'php-fpm'
+  depends_on:
+    - postgres
+  networks:
+    - web-network
+  container_name: ${PROJECT_NAME}-php
+  working_dir: /laravel
 ```
 
 # Local development

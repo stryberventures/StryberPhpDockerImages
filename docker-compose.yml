@@ -8,7 +8,7 @@ services:
   nginx:
     build:
       args:
-        - NGINX_VERSION=${NGINX_VERSION}
+        - NGINX_VERSION=$NGINX_VERSION
         - http_proxy
         - https_proxy
         - no_proxy
@@ -39,6 +39,19 @@ services:
       - web-network
     container_name: ${PROJECT_NAME}-php
 
+#  php-fpm:
+#    image: docker.pkg.github.com/stryberventures/stryberphpdockerimages/php-8.0-with-mongodb-and-elk:dev
+#    environment:
+#      - COMPOSER_MEMORY_LIMIT=-1
+#    restart: on-failure
+#    command: sh -c 'php-fpm'
+#    depends_on:
+#      - postgres
+#    networks:
+#      - web-network
+#    container_name: ${PROJECT_NAME}-php
+#    working_dir: /laravel
+
   postgres:
     build:
       args:
@@ -54,6 +67,38 @@ services:
       - web-network
     container_name: ${PROJECT_NAME}-postgres
 
+  mongodb:
+    container_name: ${PROJECT_NAME}-mongodb
+    image: 4.0
+    environment:
+      - MONGO_INITDB_DATABASE=$MONGO_DB_DATABASE
+      - MONGO_INITDB_ROOT_USERNAME=$MONGO_DB_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD=$MONGO_DB_PASSWORD
+
+  elasticsearch:
+    container_name: ${PROJECT_NAME}-elasticsearch
+    build:
+      context: ./docker/elk/elasticsearch/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - web-network
+
+  kibana:
+    container_name: ${PROJECT_NAME}-kibana
+    build:
+      context: ./docker/elk/kibana/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    networks:
+      - web-network
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+    depends_on:
+      - elasticsearch
+
   redis:
     image: "redis:${REDIS_IMAGE_VERSION}"
     command: |
@@ -66,10 +111,10 @@ services:
     build:
       context: ./docker/redis-webui
     environment:
-      - ADMIN_USER=${REDIS_WEBUI_USERNAME}
-      - ADMIN_PASS=${REDIS_WEBUI_PASSWORD}
-      - REDIS_1_HOST=${REDIS_WEBUI_CONNECT_HOST}
-      - REDIS_1_PORT=${REDIS_WEBUI_CONNECT_PORT}
+      - ADMIN_USER=$REDIS_WEBUI_USERNAME
+      - ADMIN_PASS=$REDIS_WEBUI_PASSWORD
+      - REDIS_1_HOST=$REDIS_WEBUI_CONNECT_HOST
+      - REDIS_1_PORT=$REDIS_WEBUI_CONNECT_PORT
     networks:
       - web-network
     depends_on:
