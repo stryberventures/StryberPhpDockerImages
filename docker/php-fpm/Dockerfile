@@ -37,7 +37,7 @@ RUN wget https://getcomposer.org/installer && \
     && docker-php-ext-install -j${NPROC} zip soap intl bcmath sodium gmp redis pcntl \
     && docker-php-ext-enable redis pcntl \
     # Install mongodb
-    && pecl install mongodb && docker-php-ext-enable mongodb
+    && pecl install mongodb && docker-php-ext-enable mongodb \
     # Enable production php.ini
     && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
     ## Cleanup
