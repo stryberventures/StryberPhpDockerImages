@@ -103,10 +103,6 @@ WORKDIR /laravel
 ## Copy project files to workdir
 COPY . .
 
-## Change files owner to php-fpm default user
-RUN chown -R www-data:www-data . \
-    && chmod -R 777 /laravel/storage
-
 ## Cleanup
 RUN apk del .build-deps \
     && rm -rf /var/cache/apk/*
