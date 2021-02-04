@@ -128,6 +128,11 @@ ENV COMPOSER_MEMORY_LIMIT=-1
 #
 
 FROM hashicorp/consul-template:${CONSUL_TEMPLATE_VERSION} as consul-template
+
+ARG COMPOSER=2.0.9
+FROM composer:${COMPOSER} as composer
+WORKDIR /composer
+
 FROM php-base AS prod
 
 ARG COMMIT
