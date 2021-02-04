@@ -1,4 +1,4 @@
-ARG PHP_VERSION=8.0-alpine
+ARG PHP_VERSION=8.0-fpm-alpine
 ARG CONSUL_TEMPLATE_VERSION=0.25.0-scratch
 
 #
@@ -6,7 +6,7 @@ ARG CONSUL_TEMPLATE_VERSION=0.25.0-scratch
 #
 
 FROM php:${PHP_VERSION} as php-base
-ARG PHPREDIS_VERSION=5.3.1
+ARG PHPREDIS_VERSION=5.3.2
 
 # Update the index of available packages
 RUN apk update \
