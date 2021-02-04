@@ -34,8 +34,10 @@ RUN wget https://getcomposer.org/installer && \
     # Install Postgre PDO
     && docker-php-ext-install -j${NPROC} pdo pdo_pgsql pgsql \
     # Install php extensions
-    && docker-php-ext-install -j${NPROC} zip soap intl bcmath sodium gmp redis pcntl mongodb \
-    && docker-php-ext-enable redis pcntl mongodb \
+    && docker-php-ext-install -j${NPROC} zip soap intl bcmath sodium gmp redis pcntl \
+    && docker-php-ext-enable redis pcntl \
+    # Install mongodb
+    && pecl install mongodb && docker-php-ext-enable mongodb
     # Enable production php.ini
     && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
     ## Cleanup
@@ -103,9 +105,6 @@ COPY ./docker/php-fpm/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 RUN set -ex && mkdir -p /usr/src/php/ext/xdebug \
     && curl -fsSL https://pecl.php.net/get/xdebug-${XDEBUG_VERSION} | tar xvz -C "/usr/src/php/ext/xdebug" --strip 1 \
     && docker-php-ext-install xdebug
-
-#RUN yes | pecl install xdebug \
-#    && docker-php-ext-enable xdebug
 
 WORKDIR /laravel
 ## Copy project files to workdir
