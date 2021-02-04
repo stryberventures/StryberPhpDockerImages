@@ -48,4 +48,4 @@ jobs:
           repository: "${{ env.INPUT_REPOSITORY }}"
           target: dev
           tag_with_ref: false
-          tags: latest
+          tags: dev
