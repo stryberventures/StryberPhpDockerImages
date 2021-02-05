@@ -23,6 +23,9 @@ services:
   mongodb:
     ports:
       - "27017:27017"
+    volumes:
+      - ./docker/mongodb/initdb.d/:/docker-entrypoint-initdb.d/
+      - ./docker/mongodb/data/:/data/db/
 
   elasticsearch:
     volumes:
