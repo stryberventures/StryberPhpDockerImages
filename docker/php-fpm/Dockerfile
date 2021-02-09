@@ -1,4 +1,4 @@
-ARG PHP_VERSION=8.0-fpm-alpine
+ARG PHP_VERSION=7.4-fpm-alpine
 ARG CONSUL_TEMPLATE_VERSION=0.25.0-scratch
 
 #
