@@ -6,7 +6,7 @@ ARG CONSUL_TEMPLATE_VERSION=0.25.0-scratch
 #
 
 FROM php:${PHP_VERSION} as base
-ARG PHPREDIS_VERSION=5.3.2
+ARG PHPREDIS_VERSION=5.3.4
 
 ## Install composer
 RUN apk update \
@@ -44,7 +44,7 @@ RUN apk update \
 #
 FROM base AS dev
 
-ARG XDEBUG_VERSION=3.0.1
+ARG XDEBUG_VERSION=3.0.4
 
 # Install run dependencies
 RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \

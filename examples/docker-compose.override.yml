@@ -3,7 +3,7 @@ version: "3.8"
 services:
   nginx:
     ports:
-      - 8080:80
+      - "8080:80"
     volumes:
       - .:/laravel:consistent
       - ./docker/nginx/conf.d/:/etc/nginx/conf.d
@@ -15,7 +15,7 @@ services:
 
   postgres:
     ports:
-      - 5432:5432
+      - "5432:5432"
     volumes:
       - ./docker/postgres/conf/:/docker-entrypoint-initdb.d/
       - ./docker/postgres/data/:/var/lib/postgresql/data/
@@ -24,7 +24,7 @@ services:
     volumes:
       - ./docker/redis/data/:/data
     ports:
-      - 6379:6379
+      - "6379:6379"
 
   redis-webui:
     ports:
