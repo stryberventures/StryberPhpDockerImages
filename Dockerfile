@@ -44,7 +44,7 @@ RUN apk update \
 #
 FROM base AS dev
 
-ARG XDEBUG_VERSION=3.0.1
+ARG XDEBUG_VERSION=3.0.3
 
 # Install run dependencies
 RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
