@@ -38,9 +38,9 @@ RUN apk update \
     ## Cleanup
     && apk del .build-deps && rm -rf /var/cache/apk/*
 
-##
-## DEV IMAGE
-##
+#
+# DEV IMAGE
+#
 
 FROM base AS dev
 
