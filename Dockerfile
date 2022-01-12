@@ -1,4 +1,4 @@
-ARG PHP_VERSION=8.0-fpm-alpine
+ARG PHP_VERSION=8.0.14-fpm-alpine
 ARG CONSUL_TEMPLATE_VERSION=0.25.0-scratch
 
 #
@@ -41,7 +41,7 @@ RUN apk update \
 ##
 ## DEV IMAGE
 ##
-#
+
 FROM base AS dev
 
 ARG XDEBUG_VERSION=3.0.4
