@@ -32,7 +32,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           dockerfile: Dockerfile
           registry: docker.pkg.github.com
-          repository: "${{ env.INPUT_REPOSITORY }}-latest"
+          repository: "${{ env.INPUT_REPOSITORY }}"
           target: base
           tag_with_ref: false
           tags: latest
