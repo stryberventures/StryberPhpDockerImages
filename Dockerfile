@@ -34,7 +34,8 @@ RUN apk update \
     && docker-php-ext-install -j${NPROC} zip soap intl bcmath sodium gmp redis pcntl \
     && docker-php-ext-enable redis pcntl \
     # Enable production php.ini
-    && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
+    && mv ${PHP_INI_DIR}/php.ini-production ${PHP_INI_DIR}/php.ini \
+    && sed -i s/expose_php\ =\ On/expose_php\ =\ Off/g ${PHP_INI_DIR}/php.ini \
     ## Cleanup
     && apk del .build-deps && rm -rf /var/cache/apk/*
 
@@ -55,7 +56,7 @@ RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     #  libmcrypt-dev
     libpng-dev libxslt-dev libzip-dev \
     # Enable development php.ini
-    && mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+    && mv ${PHP_INI_DIR}/php.ini-development ${PHP_INI_DIR}/php.ini
 
 ## Copy php default configuration
 COPY ./config/default.ini /usr/local/etc/php/conf.d/
